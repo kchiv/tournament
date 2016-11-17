@@ -2,6 +2,11 @@
 
 This is the project for the Intro to Relational Databases module in Udacity's Nanodegree program.
 
+# Requirements
+
+1. Python v2.7 installed
+2. The latest vagrant build for the tournament project
+
 # Tournament Files
 
 The tournament program consists of three files:
@@ -49,10 +54,17 @@ Here is how you can do that:
 vagrant@trusty32: psql => \i tournament.sql
 ```
 
-There should be two tables in your database, one for player data and another with matches and match results.
+# Testing the Program
 
-Once the tables are set up you can run tournament_test.py and the output should be:
+Once the database and the tables are set up, you need to run tournament_test.py to make sure everything is working correctly.
 
+To run the test script, you must navigate to the \tournament directory in your terminal, and then run the following command:
+
+```
+vagrant@vagrant-ubuntu-trusty-32:/vagrant/tournament$ python tournament_test.py
+```
+
+If everything is working correctly you will get the following output:
 ```
 1. countPlayers() returns 0 after initial deletePlayers() execution.
 2. countPlayers() returns 1 after one player is registered.
