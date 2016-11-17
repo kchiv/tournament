@@ -4,42 +4,53 @@
 #
 
 import psycopg2
+from contextlib import contextmanager
 
 
 def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
-    return psycopg2.connect("dbname=tournament")
+    try:
+        return psycopg2.connect("dbname=tournament")
+    except:
+        print "Connection failed!"
+
+@contextmanager
+def get_cursor():
+    """
+    Query helper function using context lib. Creates a cursor from a database
+    connection object and perfors queries using that cursor.
+    """
+    db = connect()
+    db_cursor = db.cursor()
+    try:
+        yield db_cursor
+    except:
+        raise
+    else:
+        db.commit()
+    finally:
+        db_cursor.close()
+        db.close()
 
 
 def deleteMatches():
     """Remove all the match records from the database."""
-    db = connect()
-    db_cursor = db.cursor()
-    query = "DELETE FROM matches"
-    db_cursor.execute(query)
-    db.commit()
-    db.close()
+    with get_cursor() as cursor:
+        cursor.execute("DELETE FROM matches")
 
 
 def deletePlayers():
     """Remove all the player records from the database."""
-    db = connect()
-    db_cursor = db.cursor()
-    query = "DELETE FROM players"
-    db_cursor.execute(query)
-    db.commit()
-    db.close()
+    with get_cursor() as cursor:
+        cursor.execute("DELETE FROM players")
 
 
 def countPlayers():
     """Returns the number of players currently registered."""
-    db = connect()
-    db_cursor = db.cursor()
-    query = "SELECT COUNT(player_id) FROM players"
-    db_cursor.execute(query)
-    player_cnt = db_cursor.fetchone()[0]
-    db.close()
-    return player_cnt
+    with get_cursor() as cursor:
+        cursor.execute("SELECT COUNT(player_id) FROM players")
+        player_cnt = cursor.fetchone()[0]
+        return player_cnt
 
 
 def registerPlayer(name):
@@ -51,12 +62,9 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
-    db = connect()
-    db_cursor = db.cursor()
-    query = "INSERT INTO players (player_name) VALUES (%s)"
-    db_cursor.execute(query, (name,))
-    db.commit()
-    db.close()
+    with get_cursor() as cursor:
+        query = "INSERT INTO players (player_name) VALUES (%s)"
+        cursor.execute(query, (name,))
 
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
@@ -71,21 +79,19 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    db = connect()
-    db_cursor = db.cursor()
-    query = """
-    SELECT players.player_id, players.player_name, (SELECT COUNT(matches.winner)
-    FROM matches WHERE players.player_id = matches.winner) AS wins,
-    (SELECT COUNT(matches.match_id) FROM matches WHERE
-    players.player_id = matches.winner OR players.player_id = matches.loser)
-    AS matches_played FROM players LEFT JOIN matches ON
-    players.player_id = matches.winner GROUP BY players.player_id
-    ORDER BY wins DESC
-    """
-    db_cursor.execute(query)
-    player_st = db_cursor.fetchall()
-    db.close()
-    return player_st
+    with get_cursor() as cursor:
+        query = """
+        SELECT players.player_id, players.player_name, (SELECT COUNT(matches.winner)
+        FROM matches WHERE players.player_id = matches.winner) AS wins,
+        (SELECT COUNT(matches.match_id) FROM matches WHERE
+        players.player_id = matches.winner OR players.player_id = matches.loser)
+        AS matches_played FROM players LEFT JOIN matches ON
+        players.player_id = matches.winner GROUP BY players.player_id
+        ORDER BY wins DESC
+        """
+        cursor.execute(query)
+        player_st = cursor.fetchall()
+        return player_st
 
 def reportMatch(winner, loser):
     """Records the outcome of a single match between two players.
@@ -94,12 +100,9 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
-    db = connect()
-    db_cursor = db.cursor()
-    query = "INSERT INTO matches (winner, loser) VALUES (%s, %s)"
-    db_cursor.execute(query, (winner, loser))
-    db.commit()
-    db.close()
+    with get_cursor() as cursor:
+        query = "INSERT INTO matches (winner, loser) VALUES (%s, %s)"
+        cursor.execute(query, (winner, loser))
  
  
 def swissPairings():
@@ -117,36 +120,34 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
-    db = connect()
-    db_cursor = db.cursor()
-    query = """
-    SELECT players.player_id, players.player_name, (SELECT COUNT(matches.winner)
-    FROM matches WHERE players.player_id = matches.winner) AS wins,
-    (SELECT COUNT(matches.match_id) FROM matches WHERE
-    players.player_id = matches.winner OR players.player_id = matches.loser)
-    AS matches_played FROM players LEFT JOIN matches ON
-    players.player_id = matches.winner GROUP BY players.player_id
-    ORDER BY wins DESC
-    """
-    db_cursor.execute(query)
-    rows = db_cursor.fetchall()
-    db.close()
-    if countPlayers() < 2:
-        print "There aren't enough players."
-    else:
-        i = 0
-        pairings = []
-        while i < len(rows):
-            player_one_id = rows[i][0]
-            player_one_name = rows[i][1]
-            player_two_id = rows[i + 1][0]
-            player_two_name = rows[i + 1][1]
-            pairings.append((
-                player_one_id,
-                player_one_name,
-                player_two_id,
-                player_two_name))
-            i = i + 2
+    with get_cursor() as cursor:
+        query = """
+        SELECT players.player_id, players.player_name, (SELECT COUNT(matches.winner)
+        FROM matches WHERE players.player_id = matches.winner) AS wins,
+        (SELECT COUNT(matches.match_id) FROM matches WHERE
+        players.player_id = matches.winner OR players.player_id = matches.loser)
+        AS matches_played FROM players LEFT JOIN matches ON
+        players.player_id = matches.winner GROUP BY players.player_id
+        ORDER BY wins DESC
+        """
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        if countPlayers() < 2:
+            print "There aren't enough players."
+        else:
+            i = 0
+            pairings = []
+            while i < len(rows):
+                player_one_id = rows[i][0]
+                player_one_name = rows[i][1]
+                player_two_id = rows[i + 1][0]
+                player_two_name = rows[i + 1][1]
+                pairings.append((
+                    player_one_id,
+                    player_one_name,
+                    player_two_id,
+                    player_two_name))
+                i = i + 2
 
-        return pairings
+            return pairings
 
