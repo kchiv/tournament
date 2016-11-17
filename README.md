@@ -13,13 +13,24 @@ The tournament program consists of three files:
 # Starting the Vagrant Virtual Machine
 
 Before creating your database you must start up your VM or virtual machine. Here is how you do that:
-1. In your terminal, navigate to the /tournament directory then use the command ```vagrant up```
-2. 
 
+1. In your terminal, navigate to the /tournament directory then use the command ```vagrant up```. This powers up the virtual machine.
+2. You need to login to the virtual machine and you can do this by typing the command ```vagrant ssh```.
 
 # Tournament Database
 
-To create a tournament database and create the schema. 
+After you've started up the virtual machine and logged in, you will need to create a tournament database.
+
+You can create a database as well as the schema by either running the SQL commands in your terminal or executing the commands in the tournament.sql.
+
+To create a database in command line you must do the following:
+
+1. Run the command ```psql``` in the terminal.
+2. Next run the following commands to create the database and connect to it.
+```vagrant@trusty32: vagrant => CREATE DATABASE tournament;
+vagrant@trusty32: vagrant => \c tournament;
+vagrant@trusty32: tournament =>
+```
 
 There should be two tables in your database, one for player data and another with matches and match results.
 
