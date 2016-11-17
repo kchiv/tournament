@@ -10,9 +10,18 @@ The tournament program consists of three files:
 2. tournament.sql - this has all of the table data
 3. tournament_test.py - this has all of the test scripts
 
+# Starting the Vagrant Virtual Machine
+
+Before creating your database you must start up your VM or virtual machine. Here is how you do that:
+1. In your terminal, navigate to the /tournament directory then use the command ```vagrant up```
+2. 
+
+
 # Tournament Database
 
-Create a tournament database and create the schema. There should be two tables in your database, one for player data and another with matches and match results.
+To create a tournament database and create the schema. 
+
+There should be two tables in your database, one for player data and another with matches and match results.
 
 Once the tables are set up you can run tournament_test.py and the output should be:
 
