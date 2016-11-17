@@ -27,7 +27,9 @@ To create a database in command line you must do the following:
 
 1. Run the command ```psql``` in the terminal.
 2. Next run the following commands to create the database and connect to it.
-```vagrant@trusty32: vagrant => CREATE DATABASE tournament;
+
+```
+vagrant@trusty32: vagrant => CREATE DATABASE tournament;
 vagrant@trusty32: vagrant => \c tournament;
 vagrant@trusty32: tournament =>
 ```
