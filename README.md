@@ -26,12 +26,27 @@ You can create a database as well as the schema by either running the SQL comman
 To create a database in command line you must do the following:
 
 1. Run the command ```psql``` in the terminal.
-2. Next run the following commands to create the database and connect to it.
+2. Next run the following commands to create the tournament database and connect to it.
 
 ```
 vagrant@trusty32: vagrant => CREATE DATABASE tournament;
 vagrant@trusty32: vagrant => \c tournament;
 vagrant@trusty32: tournament =>
+```
+
+3. Once we have created the database and connected to it, we can then create tables in the terminal.
+```
+vagrant@trusty32: tournament => CREATE TABLE [table name](....);
+```
+
+As previously mentioned, you can also create the database and all the tables by executing a SQL file that has all the commands.
+
+Here is how you can do that:
+
+1. Run the command ```psql``` in the terminal.
+2. Run the ```\i``` command or the import command on your SQL file.
+```
+vagrant@trusty32: psql => \i tournament.sql
 ```
 
 There should be two tables in your database, one for player data and another with matches and match results.
